@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Web Chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #d1d7db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background-color: #efeae2;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* Cabeçalho Verde */
+        header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Área das Mensagens */
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            /* Fundo padrão do WA */
+        }
+
+        /* Balões de Mensagem */
+        .mensagem {
+            max-width: 65%;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .mensagem-nome {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #075e54;
+            margin-bottom: 3px;
+        }
+
+        .minha-mensagem {
+            align-self: flex-end;
+            background-color: #dcf8c6;
+            border-top-right-radius: 0;
+        }
+
+        .outra-mensagem {
+            align-self: flex-start;
+            background-color: #ffffff;
+            border-top-left-radius: 0;
+        }
+
+        /* Barra de Digitação */
+        #input-area {
+            background-color: #f0f2f5;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        #nome-usuario {
+            width: 120px;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        #mensagem-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #128c7e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #075e54;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <header>
+            Meu Web Chat Privado
+        </header>
+
+        <div id="chat-box">
+        </div>
+
+        <div id="input-area">
+            <input type="text" id="nome-usuario" placeholder="Seu nome" value="Anônimo">
+            <input type="text" id="mensagem-input" placeholder="Digite uma mensagem" autocomplete="off">
+            <button onclick="enviarMensagem()">Enviar</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const chatBox = document.getElementById('chat-box');
+        const inputMensagem = document.getElementById('mensagem-input');
+        const inputNome = document.getElementById('nome-usuario');
+
+        // Permite enviar apertando "Enter"
+        inputMensagem.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') enviarMensagem();
+        });
+
+        // O que acontece quando o botão Enviar é clicado
+        function enviarMensagem() {
+            const mensagem = inputMensagem.value.trim();
+            const nome = inputNome.value.trim() || 'Anônimo';
+
+            if (mensagem !== '') {
+                // Envia para o servidor
+                socket.emit('mensagem_chat', { nome: nome, texto: mensagem });
+                inputMensagem.value = ''; // Limpa o campo
+            }
+        }
+
+        // O que acontece quando recebemos uma mensagem do servidor
+        socket.on('mensagem_chat', (dados) => {
+            const div = document.createElement('div');
+
+            // Verifica se o nome da mensagem é igual ao nome que está no seu input para definir a cor
+            if (dados.nome === inputNome.value) {
+                div.className = 'mensagem minha-mensagem';
+            } else {
+                div.className = 'mensagem outra-mensagem';
+            }
+
+            // Monta o balão de mensagem
+            div.innerHTML = `<div class="mensagem-nome">${dados.nome}</div>${dados.texto}`;
+
+            chatBox.appendChild(div);
+
+            // Rola a tela para baixo automaticamente
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script>
+
+</body>
+
+</html>
