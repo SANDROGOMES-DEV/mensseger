@@ -3,40 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google" content="notranslate"> <title>AGD Mensseger Pro</title>
+    <meta name="google" content="notranslate">
+    <title>AGD Mensseger Pro</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #0f172a; height: 100vh; display: flex; justify-content: center; align-items: center; }
         
-        /* Layout Principal */
-        #app { display: none; width: 95vw; height: 90vh; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: none; }
+        #app { display: none; width: 95vw; height: 90vh; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         #sidebar { width: 320px; background: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
         #chat-area { flex: 1; display: flex; flex-direction: column; }
 
-        /* Estilo Contatos */
-        .sidebar-header { padding: 20px; background: #1e3a8a; color: white; text-align: center; font-weight: bold; }
-        .search-box { padding: 15px; border-bottom: 1px solid #e2e8f0; }
-        .contact-item { padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-        .contact-item:hover { background: #e0f2fe; }
-        .contact-item.active { background: #bae6fd; border-left: 5px solid #1e3a8a; }
+        .contact-item { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .contact-item:hover { background: #f0f9ff; }
+        .contact-item .info { display: flex; flex-direction: column; }
+        .contact-item .name { font-weight: bold; color: #1e3a8a; font-size: 0.9rem; }
+        .contact-item .mail { font-size: 0.7rem; color: #64748b; }
 
-        /* Chat e Mensagens */
-        header { background: #1e3a8a; color: white; padding: 15px 25px; display: flex; align-items: center; gap: 15px; }
-        #messages { flex: 1; padding: 25px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 12px; }
-        .msg-row { display: flex; gap: 10px; max-width: 75%; align-items: flex-end; }
+        header { background: #1e3a8a; color: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+        .msg-row { display: flex; gap: 8px; max-width: 80%; align-items: flex-end; }
         .msg-me { align-self: flex-end; flex-direction: row-reverse; }
-        .bubble { padding: 12px 18px; border-radius: 18px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.4; }
+        .bubble { padding: 10px 14px; border-radius: 15px; background: white; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .msg-me .bubble { background: #1e3a8a; color: white; }
-        .avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; }
+        .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #cbd5e1; }
 
-        /* Auth Screen */
-        .auth-container { background: white; padding: 40px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        h2 { color: #1e3a8a; margin-bottom: 25px; }
-        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; }
-        button { width: 100%; padding: 14px; background: #1e3a8a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #1e40af; }
-
-        .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
+        .auth-container { background: white; padding: 35px; border-radius: 20px; width: 360px; text-align: center; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 10px; }
+        button { width: 100%; padding: 12px; background: #1e3a8a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .input-area { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
     </style>
 </head>
 <body>
@@ -44,36 +38,36 @@
     <div id="auth-area" class="auth-container">
         <h2 id="auth-title">AGD Mensseger</h2>
         <div id="reg-fields" style="display:none">
-            <input type="text" id="reg-nome" placeholder="Seu Nome Completo">
-            <input type="text" id="reg-foto" placeholder="URL da Foto (ex: link do Google Images)">
+            <input type="text" id="reg-nome" placeholder="Seu Nome">
+            <input type="text" id="reg-foto" placeholder="Link da Foto (opcional)">
         </div>
-        <input type="email" id="auth-email" placeholder="Seu E-mail">
-        <input type="password" id="auth-senha" placeholder="Sua Senha">
+        <input type="email" id="auth-email" placeholder="E-mail">
+        <input type="password" id="auth-senha" placeholder="Senha">
         <button onclick="executarAuth()" id="btn-auth">Entrar</button>
-        <p onclick="alternarModo()" style="margin-top:20px; color:#3b82f6; cursor:pointer; font-size: 0.9rem;" id="toggle-txt">Não tem conta? Cadastre-se</p>
+        <p onclick="alternar()" style="margin-top:15px; color:#3b82f6; cursor:pointer; font-size:0.8rem;" id="toggle-txt">Cadastre-se</p>
     </div>
 
     <div id="app">
         <div id="sidebar">
-            <div class="sidebar-header">Contatos</div>
-            <div class="search-box">
-                <input type="text" id="friend-email" placeholder="E-mail do amigo..." style="margin:0; padding:10px; font-size: 0.8rem;">
-                <button onclick="adicionarAmigo()" style="margin-top:8px; padding:8px;">Adicionar +</button>
+            <div style="padding:15px; background:#1e3a8a; color:white; font-weight:bold; text-align:center;">Contatos</div>
+            <div style="padding:10px; border-bottom:1px solid #e2e8f0;">
+                <input type="text" id="add-mail" placeholder="E-mail do amigo..." style="margin:0; padding:8px; font-size:0.8rem;">
+                <button onclick="adicionarAmigo()" style="margin-top:5px; padding:5px;">Adicionar +</button>
             </div>
             <div id="contacts-list" style="overflow-y:auto"></div>
         </div>
         <div id="chat-area">
             <header>
                 <img id="my-pic" class="avatar" src="">
-                <div id="header-info">
-                    <div style="font-weight:bold" id="target-name">AGD Mensseger</div>
-                    <div style="font-size:0.7rem; opacity:0.8" id="target-email">Selecione um contato para conversar</div>
+                <div>
+                    <div id="chat-nome" style="font-weight:bold">Selecione um chat</div>
+                    <div id="chat-status" style="font-size:0.7rem; opacity:0.8">Offline</div>
                 </div>
             </header>
-            <div id="messages" translate="no"></div>
-            <div id="msg-controls" class="input-area" style="display:none">
-                <input type="text" id="msg-input" placeholder="Escreva uma mensagem..." style="margin:0">
-                <button onclick="enviarMensagem()" style="width:auto; padding: 0 25px;">Enviar</button>
+            <div id="messages"></div>
+            <div id="controls" class="input-area" style="display:none">
+                <input type="text" id="msg-input" placeholder="Escreva aqui..." style="margin:0">
+                <button onclick="enviar()" style="width:auto; padding:0 20px">Enviar</button>
             </div>
         </div>
     </div>
@@ -83,26 +77,18 @@
         const socket = io();
         let userEmail = '', userFoto = '', chatAtivo = '', isLogin = true;
 
-        // --- NAVEGAÇÃO ---
-        function alternarModo() {
+        function alternar() {
             isLogin = !isLogin;
             document.getElementById('auth-title').innerText = isLogin ? 'AGD Mensseger' : 'Criar Conta';
             document.getElementById('reg-fields').style.display = isLogin ? 'none' : 'block';
             document.getElementById('btn-auth').innerText = isLogin ? 'Entrar' : 'Cadastrar';
-            document.getElementById('toggle-txt').innerText = isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça Login';
         }
 
-        // --- AUTENTICAÇÃO ---
         function executarAuth() {
             const email = document.getElementById('auth-email').value;
             const senha = document.getElementById('auth-senha').value;
-            if(isLogin) {
-                socket.emit('tentativa_login', { email, senha });
-            } else {
-                const nome = document.getElementById('reg-nome').value;
-                const foto = document.getElementById('reg-foto').value;
-                socket.emit('registar_utilizador', { nome, email, senha, foto });
-            }
+            if(isLogin) socket.emit('tentativa_login', { email, senha });
+            else socket.emit('registar_utilizador', { nome: document.getElementById('reg-nome').value, foto: document.getElementById('reg-foto').value, email, senha });
         }
 
         socket.on('login_sucesso', d => {
@@ -110,38 +96,37 @@
             document.getElementById('auth-area').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             document.getElementById('my-pic').src = d.foto;
-            atualizarListaContatos(d.contatos);
+            renderizarContatos(d.contatos);
         });
 
-        // --- CONTATOS ---
         function adicionarAmigo() {
-            const mail = document.getElementById('friend-email').value;
-            if(mail) socket.emit('adicionar_contato', mail);
-            document.getElementById('friend-email').value = '';
+            socket.emit('adicionar_contato', document.getElementById('add-mail').value);
+            document.getElementById('add-mail').value = '';
         }
 
-        socket.on('atualizar_contatos', atualizarListaContatos);
+        socket.on('atualizar_contatos', renderizarContatos);
 
-        function atualizarListaContatos(lista) {
-            const container = document.getElementById('contacts-list');
-            container.innerHTML = lista.map(email => `
-                <div class="contact-item" onclick="abrirChat('${email}')">
-                    <div class="avatar" style="background:#1e3a8a; color:white; display:flex; align-items:center; justify-content:center; font-size:10px">ID</div>
-                    <span>${email}</span>
+        function renderizarContatos(lista) {
+            document.getElementById('contacts-list').innerHTML = lista.map(c => `
+                <div class="contact-item" onclick="abrirChat('${c.email}', '${c.nome}', '${c.foto}')">
+                    <img src="${c.foto}" class="avatar">
+                    <div class="info">
+                        <span class="name">${c.nome}</span>
+                        <span class="mail">${c.email}</span>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function abrirChat(email) {
+        function abrirChat(email, nome, foto) {
             chatAtivo = email;
-            document.getElementById('target-email').innerText = `Conversando com: ${email}`;
-            document.getElementById('msg-controls').style.display = 'flex';
-            document.getElementById('messages').innerHTML = ''; // Limpa tela para nova conversa
-            // Futuramente aqui carregaremos o histórico do banco
+            document.getElementById('chat-nome').innerText = nome;
+            document.getElementById('chat-status').innerText = 'Online';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('messages').innerHTML = '';
         }
 
-        // --- MENSAGENS ---
-        function enviarMensagem() {
+        function enviar() {
             const txt = document.getElementById('msg-input').value;
             if(txt && chatAtivo) {
                 socket.emit('enviar_privado', { para: chatAtivo, texto: txt });
@@ -154,21 +139,15 @@
                 const box = document.getElementById('messages');
                 const div = document.createElement('div');
                 div.className = `msg-row ${d.de === userEmail ? 'msg-me' : ''}`;
-                div.innerHTML = `
-                    <img src="${d.foto}" class="avatar">
-                    <div class="bubble">${d.texto}</div>
-                `;
+                div.innerHTML = `<img src="${d.foto}" class="avatar"><div class="bubble">${d.texto}</div>`;
                 box.appendChild(div);
                 box.scrollTop = box.scrollHeight;
             }
         });
 
-        socket.on('registo_sucesso', () => { alert("Conta criada! Agora faça o Login."); alternarModo(); });
-        socket.on('login_erro', () => alert("E-mail ou senha incorretos."));
+        socket.on('registo_sucesso', () => { alert("Conta criada!"); alternar(); });
         socket.on('erro_sistema', m => alert(m));
-
-        // Enviar com Enter
-        document.getElementById('msg-input').addEventListener('keypress', e => { if(e.key === 'Enter') enviarMensagem(); });
+        document.getElementById('msg-input').addEventListener('keypress', e => { if(e.key === 'Enter') enviar(); });
     </script>
 </body>
 </html>
