@@ -8,75 +8,121 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Define a pasta public como local dos arquivos do site
 app.use(express.static('public'));
 
-// Ligar ao MongoDB usando a variável que configuraste no Render
+// Conexão com o Banco de Dados via Variável de Ambiente do Render
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Conectado ao MongoDB com sucesso!'))
-    .catch(err => console.error('Erro ao ligar ao MongoDB:', err));
+  .then(() => console.log('✅ Banco de dados conectado com sucesso!'))
+  .catch(err => console.error('❌ Erro ao conectar ao MongoDB:', err));
 
-// Esquema do Utilizador (Nome, Email, Senha e Lista de Contactos)
+// --- MODELOS DE DADOS ---
+
+// Modelo de Usuário: Nome, Email, Senha Criptografada, Foto e Amigos
 const userSchema = new mongoose.Schema({
     nome: String,
     email: { type: String, unique: true, required: true },
     senha: { type: String, required: true },
-    contactos: [String] // Lista de emails dos amigos
+    foto: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' },
+    contatos: [String] 
 });
-
 const User = mongoose.model('User', userSchema);
 
-// Esquema das Mensagens (Para o Histórico)
+// Modelo de Mensagem: Quem enviou, para quem, o texto e a foto no momento
 const messageSchema = new mongoose.Schema({
-    de: String,
-    para: String,
-    texto: String,
+    de: String, 
+    para: String, 
+    texto: String, 
+    foto: String,
     data: { type: Date, default: Date.now }
 });
-
 const Message = mongoose.model('Message', messageSchema);
 
-io.on('connection', (socket) => {
+// --- LÓGICA EM TEMPO REAL (SOCKET.IO) ---
 
-    // LÓGICA DE REGISTO (NOVO)
+io.on('connection', (socket) => {
+    
+    // Cadastro de novo usuário
     socket.on('registar_utilizador', async (dados) => {
         try {
-            const senhaEncriptada = await bcrypt.hash(dados.senha, 10);
-            const novoUser = new User({
-                nome: dados.nome,
-                email: dados.email,
-                senha: senhaEncriptada
+            const senhaHash = await bcrypt.hash(dados.senha, 10);
+            const novoUser = new User({ 
+                nome: dados.nome, 
+                email: dados.email, 
+                senha: senhaHash,
+                foto: dados.foto || undefined 
             });
             await novoUser.save();
             socket.emit('registo_sucesso');
         } catch (err) {
-            socket.emit('registo_erro', 'Email já existe ou erro no sistema.');
+            socket.emit('registo_erro', 'E-mail já cadastrado ou erro no servidor.');
         }
     });
 
-    // LÓGICA DE LOGIN COM BANCO DE DADOS
+    // Login com validação de senha e entrada em sala privada
     socket.on('tentativa_login', async (dados) => {
         const user = await User.findOne({ email: dados.email });
         if (user && await bcrypt.compare(dados.senha, user.senha)) {
-            socket.emailUtilizador = user.email;
-            socket.nomeUtilizador = user.nome;
-            socket.emit('login_sucesso', { nome: user.nome, email: user.email });
-
-            io.emit('mensagem_chat', { nome: 'Sistema', texto: `👋 ${user.nome} entrou.` });
+            socket.email = user.email;
+            socket.nome = user.nome;
+            socket.foto = user.foto;
+            
+            // O usuário entra em uma "sala" com o próprio e-mail para receber msgs privadas
+            socket.join(user.email); 
+            
+            socket.emit('login_sucesso', { 
+                nome: user.nome, 
+                email: user.email, 
+                foto: user.foto, 
+                contatos: user.contatos 
+            });
         } else {
             socket.emit('login_erro');
         }
     });
 
-    socket.on('mensagem_chat', async (dados) => {
-        if (socket.nomeUtilizador) {
-            // Guarda a mensagem no banco de dados antes de enviar
-            const novaMsg = new Message({ de: socket.nomeUtilizador, texto: dados.texto });
-            await novaMsg.save();
-
-            io.emit('mensagem_chat', { nome: socket.nomeUtilizador, texto: dados.texto });
+    // Adicionar um amigo à lista de contatos
+    socket.on('adicionar_contato', async (emailAlvo) => {
+        const alvo = await User.findOne({ email: emailAlvo });
+        if (alvo && emailAlvo !== socket.email) {
+            await User.findOneAndUpdate(
+                { email: socket.email }, 
+                { $addToSet: { contatos: emailAlvo } } // Adiciona sem duplicar
+            );
+            const eu = await User.findOne({ email: socket.email });
+            socket.emit('atualizar_contatos', eu.contatos);
+        } else {
+            socket.emit('erro_sistema', 'Usuário não encontrado ou e-mail inválido.');
         }
+    });
+
+    // Envio de mensagem privada (apenas para o destinatário e para si mesmo)
+    socket.on('enviar_privado', async (dados) => {
+        if (!socket.email) return;
+
+        const novaMsg = new Message({ 
+            de: socket.email, 
+            para: dados.para, 
+            texto: dados.texto, 
+            foto: socket.foto 
+        });
+        await novaMsg.save();
+        
+        // Envia para a "sala" do destinatário e para o remetente
+        io.to(dados.para).emit('nova_msg', { 
+            de: socket.email, 
+            nome: socket.nome, 
+            texto: dados.texto, 
+            foto: socket.foto 
+        });
+        socket.emit('nova_msg', { 
+            de: socket.email, 
+            nome: socket.nome, 
+            texto: dados.texto, 
+            foto: socket.foto 
+        });
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Servidor na porta ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
