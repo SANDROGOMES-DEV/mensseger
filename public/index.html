@@ -1,38 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
     <title>AGD Mensseger Pro</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0f172a; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        
-        #app { display: none; width: 95vw; height: 90vh; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        #sidebar { width: 320px; background: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        #chat-area { flex: 1; display: flex; flex-direction: column; }
-
-        .contact-item { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
-        .contact-item:hover { background: #f0f9ff; }
-        .contact-item .info { display: flex; flex-direction: column; }
-        .contact-item .name { font-weight: bold; color: #1e3a8a; font-size: 0.9rem; }
-        .contact-item .mail { font-size: 0.7rem; color: #64748b; }
-
-        header { background: #1e3a8a; color: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; }
-        #messages { flex: 1; padding: 20px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
-        .msg-row { display: flex; gap: 8px; max-width: 80%; align-items: flex-end; }
-        .msg-me { align-self: flex-end; flex-direction: row-reverse; }
-        .bubble { padding: 10px 14px; border-radius: 15px; background: white; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg-me .bubble { background: #1e3a8a; color: white; }
-        .avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #cbd5e1; }
-
-        .auth-container { background: white; padding: 35px; border-radius: 20px; width: 360px; text-align: center; }
-        input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 10px; }
-        button { width: 100%; padding: 12px; background: #1e3a8a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .input-area { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div id="auth-area" class="auth-container">
@@ -44,110 +20,46 @@
         <input type="email" id="auth-email" placeholder="E-mail">
         <input type="password" id="auth-senha" placeholder="Senha">
         <button onclick="executarAuth()" id="btn-auth">Entrar</button>
-        <p onclick="alternar()" style="margin-top:15px; color:#3b82f6; cursor:pointer; font-size:0.8rem;" id="toggle-txt">Cadastre-se</p>
+        <p onclick="alternar()" id="toggle-txt">Cadastre-se</p>
     </div>
 
     <div id="app">
+        <div id="menu-overlay" onclick="toggleSidebar()"></div>
+
         <div id="sidebar">
-            <div style="padding:15px; background:#1e3a8a; color:white; font-weight:bold; text-align:center;">Contatos</div>
-            <div style="padding:10px; border-bottom:1px solid #e2e8f0;">
-                <input type="text" id="add-mail" placeholder="E-mail do amigo..." style="margin:0; padding:8px; font-size:0.8rem;">
-                <button onclick="adicionarAmigo()" style="margin-top:5px; padding:5px;">Adicionar +</button>
+            <div class="sidebar-header">
+                Contatos
+                <button class="close-mobile" onclick="toggleSidebar()">✕</button>
             </div>
-            <div id="contacts-list" style="overflow-y:auto"></div>
+            <div class="search-box">
+                <input type="text" id="add-mail" placeholder="E-mail do amigo...">
+                <button onclick="adicionarAmigo()">Adicionar +</button>
+            </div>
+            <div id="contacts-list"></div>
         </div>
+
         <div id="chat-area">
             <header>
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
                 <img id="my-pic" class="avatar" src="">
-                <div>
-                    <div id="chat-nome" style="font-weight:bold">Selecione um chat</div>
-                    <div id="chat-status" style="font-size:0.7rem; opacity:0.8">Offline</div>
+                <div class="header-text">
+                    <div id="chat-nome">Selecione um chat</div>
+                    <div id="chat-status">Offline</div>
                 </div>
             </header>
+
             <div id="messages"></div>
+
             <div id="controls" class="input-area" style="display:none">
-                <input type="text" id="msg-input" placeholder="Escreva aqui..." style="margin:0">
-                <button onclick="enviar()" style="width:auto; padding:0 20px">Enviar</button>
+                <input type="text" id="msg-input" placeholder="Escreva aqui...">
+                <button onclick="enviar()">Enviar</button>
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        let userEmail = '', userFoto = '', chatAtivo = '', isLogin = true;
-
-        function alternar() {
-            isLogin = !isLogin;
-            document.getElementById('auth-title').innerText = isLogin ? 'AGD Mensseger' : 'Criar Conta';
-            document.getElementById('reg-fields').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('btn-auth').innerText = isLogin ? 'Entrar' : 'Cadastrar';
-        }
-
-        function executarAuth() {
-            const email = document.getElementById('auth-email').value;
-            const senha = document.getElementById('auth-senha').value;
-            if(isLogin) socket.emit('tentativa_login', { email, senha });
-            else socket.emit('registar_utilizador', { nome: document.getElementById('reg-nome').value, foto: document.getElementById('reg-foto').value, email, senha });
-        }
-
-        socket.on('login_sucesso', d => {
-            userEmail = d.email; userFoto = d.foto;
-            document.getElementById('auth-area').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-            document.getElementById('my-pic').src = d.foto;
-            renderizarContatos(d.contatos);
-        });
-
-        function adicionarAmigo() {
-            socket.emit('adicionar_contato', document.getElementById('add-mail').value);
-            document.getElementById('add-mail').value = '';
-        }
-
-        socket.on('atualizar_contatos', renderizarContatos);
-
-        function renderizarContatos(lista) {
-            document.getElementById('contacts-list').innerHTML = lista.map(c => `
-                <div class="contact-item" onclick="abrirChat('${c.email}', '${c.nome}', '${c.foto}')">
-                    <img src="${c.foto}" class="avatar">
-                    <div class="info">
-                        <span class="name">${c.nome}</span>
-                        <span class="mail">${c.email}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function abrirChat(email, nome, foto) {
-            chatAtivo = email;
-            document.getElementById('chat-nome').innerText = nome;
-            document.getElementById('chat-status').innerText = 'Online';
-            document.getElementById('controls').style.display = 'flex';
-            document.getElementById('messages').innerHTML = '';
-        }
-
-        function enviar() {
-            const txt = document.getElementById('msg-input').value;
-            if(txt && chatAtivo) {
-                socket.emit('enviar_privado', { para: chatAtivo, texto: txt });
-                document.getElementById('msg-input').value = '';
-            }
-        }
-
-        socket.on('nova_msg', d => {
-            if(d.de === chatAtivo || d.de === userEmail) {
-                const box = document.getElementById('messages');
-                const div = document.createElement('div');
-                div.className = `msg-row ${d.de === userEmail ? 'msg-me' : ''}`;
-                div.innerHTML = `<img src="${d.foto}" class="avatar"><div class="bubble">${d.texto}</div>`;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-            }
-        });
-
-        socket.on('registo_sucesso', () => { alert("Conta criada!"); alternar(); });
-        socket.on('erro_sistema', m => alert(m));
-        document.getElementById('msg-input').addEventListener('keypress', e => { if(e.key === 'Enter') enviar(); });
-    </script>
+    <script src="script.js"></script>
 </body>
+
 </html>
