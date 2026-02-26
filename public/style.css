@@ -193,14 +193,14 @@ button {
 }
 
 /* --- RESPONSIVIDADE (PARA CELULAR) --- */
-@media (max-width: 768px) {
+@media (max-width: 100%) {
     #sidebar {
         position: absolute;
         left: -100%;
         /* Esconde para a esquerda */
         top: 0;
         height: 100%;
-        width: 280px;
+        width: 100%;
         box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
     }
 
@@ -245,4 +245,5 @@ button {
         border-radius: 20px;
         display: flex;
     }
+
 }
