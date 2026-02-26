@@ -10,6 +10,7 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
+// Ligação ao MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Banco de dados conectado!'))
   .catch(err => console.error('❌ Erro DB:', err));
@@ -25,12 +26,14 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 const messageSchema = new mongoose.Schema({
-    de: String, para: String, texto: String, foto: String,
+    de: String, 
+    para: String, 
+    texto: String, 
+    foto: String,
     data: { type: Date, default: Date.now }
 });
 const Message = mongoose.model('Message', messageSchema);
 
-// FUNÇÃO AUXILIAR: Transforma lista de e-mails em lista de perfis (nome, email, foto)
 const buscarDadosContatos = async (emails) => {
     const dados = await User.find({ email: { $in: emails } }, 'nome email foto');
     return dados.map(u => ({ nome: u.nome, email: u.email, foto: u.foto }));
@@ -57,16 +60,20 @@ io.on('connection', (socket) => {
             socket.nome = user.nome;
             socket.foto = user.foto;
             socket.join(user.email);
-            
-            // Busca os nomes e fotos dos contatos antes de enviar o sucesso do login
             const contatosComDados = await buscarDadosContatos(user.contatos);
-            socket.emit('login_sucesso', { 
-                nome: user.nome, 
-                email: user.email, 
-                foto: user.foto, 
-                contatos: contatosComDados 
-            });
+            socket.emit('login_sucesso', { nome: user.nome, email: user.email, foto: user.foto, contatos: contatosComDados });
         } else { socket.emit('login_erro'); }
+    });
+
+    // BUSCAR HISTÓRICO DE MENSAGENS [NOVO]
+    socket.on('buscar_historico', async (emailAlvo) => {
+        const mensagens = await Message.find({
+            $or: [
+                { de: socket.email, para: emailAlvo },
+                { de: emailAlvo, para: socket.email }
+            ]
+        }).sort({ data: 1 }); // Ordena da mais antiga para a mais recente
+        socket.emit('historico_carregado', mensagens);
     });
 
     socket.on('adicionar_contato', async (emailAlvo) => {
@@ -76,12 +83,11 @@ io.on('connection', (socket) => {
             const eu = await User.findOne({ email: socket.email });
             const contatosComDados = await buscarDadosContatos(eu.contatos);
             socket.emit('atualizar_contatos', contatosComDados);
-        } else {
-            socket.emit('erro_sistema', 'Usuário não encontrado.');
-        }
+        } else { socket.emit('erro_sistema', 'Usuário não encontrado.'); }
     });
 
     socket.on('enviar_privado', async (dados) => {
+        if (!socket.email) return;
         const msg = new Message({ de: socket.email, para: dados.para, texto: dados.texto, foto: socket.foto });
         await msg.save();
         io.to(dados.para).emit('nova_msg', { de: socket.email, nome: socket.nome, texto: dados.texto, foto: socket.foto });
