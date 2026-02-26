@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +7,6 @@
     <title>AGD Mensseger Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <div id="auth-area" class="auth-container">
@@ -25,7 +23,6 @@
 
     <div id="app">
         <div id="menu-overlay" onclick="toggleSidebar()"></div>
-
         <div id="sidebar">
             <div class="sidebar-header">
                 Contatos
@@ -33,7 +30,7 @@
             </div>
             <div class="search-box">
                 <input type="text" id="add-mail" placeholder="E-mail do amigo...">
-                <button onclick="adicionarAmigo()">Adicionar +</button>
+                <button onclick="adicionarAmigo()">Add</button>
             </div>
             <div id="contacts-list"></div>
         </div>
@@ -41,16 +38,13 @@
         <div id="chat-area">
             <header>
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-
                 <img id="my-pic" class="avatar" src="">
-                <div class="header-text">
+                <div>
                     <div id="chat-nome">Selecione um chat</div>
                     <div id="chat-status">Offline</div>
                 </div>
             </header>
-
             <div id="messages"></div>
-
             <div id="controls" class="input-area" style="display:none">
                 <input type="text" id="msg-input" placeholder="Escreva aqui...">
                 <button onclick="enviar()">Enviar</button>
@@ -61,5 +55,4 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
