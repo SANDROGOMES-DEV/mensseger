@@ -1,250 +1,42 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: #0f172a; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-body {
-    background: #0f172a;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
+#app { display: none; width: 100vw; height: 100vh; background: white; overflow: hidden; position: relative; }
+#sidebar { width: 300px; background: #f8fafc; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 10; transition: 0.3s; }
+#chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
 
-/* Layout App */
-#app {
-    display: none;
-    width: 100vw;
-    height: 100vh;
-    background: white;
-    overflow: hidden;
-    position: relative;
-}
+.sidebar-header { padding: 15px; background: #1e3a8a; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+.search-box { padding: 10px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 5px; }
+.search-box input { padding: 8px; font-size: 0.8rem; margin: 0; }
+.search-box button { width: auto; padding: 8px 12px; }
 
-/* Sidebar (Menu Lateral) */
-#sidebar {
-    width: 300px;
-    background: #f8fafc;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-    transition: 0.3s;
-}
+.contact-item { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+.contact-item:hover { background: #f0f9ff; }
+.contact-item .name { font-weight: bold; color: #1e3a8a; font-size: 0.9rem; }
+.contact-item .mail { font-size: 0.7rem; color: #64748b; }
 
-#chat-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
+header { background: #1e3a8a; color: white; padding: 10px 15px; display: flex; align-items: center; gap: 12px; }
+#messages { flex: 1; padding: 15px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+.msg-row { display: flex; gap: 8px; max-width: 85%; align-items: flex-end; }
+.msg-me { align-self: flex-end; flex-direction: row-reverse; }
+.bubble { padding: 10px 14px; border-radius: 15px; background: white; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.msg-me .bubble { background: #1e3a8a; color: white; }
+.avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; flex-shrink: 0; }
 
-/* Elementos da Sidebar */
-.sidebar-header {
-    padding: 20px;
-    background: #1e3a8a;
-    color: white;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.auth-container { background: white; padding: 30px; border-radius: 20px; width: 350px; text-align: center; }
+input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; }
+button { width: 100%; padding: 12px; background: #1e3a8a; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+.input-area { padding: 12px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; }
 
-.close-mobile {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    display: none;
-    width: auto;
-    padding: 0;
-}
-
-.contact-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f1f5f9;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.contact-item:hover {
-    background: #f0f9ff;
-}
-
-.contact-item .name {
-    font-weight: bold;
-    color: #1e3a8a;
-    font-size: 0.9rem;
-}
-
-.contact-item .mail {
-    font-size: 0.7rem;
-    color: #64748b;
-    display: block;
-}
-
-/* Header do Chat */
-header {
-    background: #1e3a8a;
-    color: white;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.menu-toggle {
-    background: #1e40af;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    padding: 5px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: none;
-    width: auto;
-}
-
-#messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    background: #f1f5f9;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.msg-row {
-    display: flex;
-    gap: 8px;
-    max-width: 85%;
-    align-items: flex-end;
-}
-
-.msg-me {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-.bubble {
-    padding: 10px 14px;
-    border-radius: 15px;
-    background: white;
-    font-size: 0.9rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.msg-me .bubble {
-    background: #1e3a8a;
-    color: white;
-}
-
-.avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #cbd5e1;
-    flex-shrink: 0;
-}
-
-/* Auth e Inputs */
-.auth-container {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    width: 350px;
-    text-align: center;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    outline: none;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background: #1e3a8a;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.input-area {
-    padding: 12px;
-    background: white;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    gap: 8px;
-}
-
-/* --- RESPONSIVIDADE (PARA CELULAR) --- */
 @media (max-width: 768px) {
-    #sidebar {
-        position: absolute;
-        left: -100%;
-        /* Esconde para a esquerda */
-        top: 0;
-        height: 100%;
-        width: 280px;
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
-    }
-
-    #sidebar.active {
-        left: 0;
-    }
-
-    /* Mostra o menu */
-
-    .menu-toggle,
-    .close-mobile {
-        display: block;
-    }
-
-    #menu-overlay {
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 5;
-    }
-
-    #sidebar.active+#chat-area #menu-overlay {
-        display: block;
-    }
-
-    #app {
-        width: 100vw;
-        height: 100vh;
-        border-radius: 0;
-    }
+    #sidebar { position: absolute; left: -100%; top: 0; height: 100%; width: 280px; box-shadow: 10px 0 30px rgba(0,0,0,0.2); }
+    #sidebar.active { left: 0; }
+    .menu-toggle, .close-mobile { display: block; }
+    #menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5; }
+    #sidebar.active + #chat-area #menu-overlay { display: block; }
 }
 
-/* Ajuste para Desktop */
 @media (min-width: 769px) {
-    #app {
-        width: 95vw;
-        height: 90vh;
-        border-radius: 20px;
-        display: flex;
-    }
-
+    #app { width: 95vw; height: 90vh; border-radius: 20px; display: flex; }
+    .menu-toggle, .close-mobile { display: none; }
 }
-
